@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  twocolorball:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: twocolorball
+    ports:
+      - "80:80"
+    restart: always 
