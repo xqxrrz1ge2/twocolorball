@@ -18,7 +18,7 @@ RUN npm run build
 RUN npm install -g serve
 
 # 暴露端口（可以根据需要修改）
-EXPOSE 3000
+EXPOSE 3100
 
 # 使用serve提供静态文件服务
 CMD ["serve", "-s", "build", "-l", "3000"] 
