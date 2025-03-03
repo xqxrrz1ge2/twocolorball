@@ -1,11 +1,12 @@
-# 双色球应用部署指南
+# 双色球应用部署指南（适用于Cloudflare Zero Trust）
 
-本文档提供了将双色球应用部署到VPS的详细步骤。
+本文档提供了将双色球应用部署到VPS并通过Cloudflare Zero Trust访问的详细步骤。
 
-## 方法一：使用Docker部署（推荐）
+## 使用Docker部署（无需Nginx）
 
 ### 前提条件
 - 一台安装了Docker和Docker Compose的VPS
+- Cloudflare Zero Trust账户
 - 基本的Linux命令行知识
 
 ### 部署步骤
@@ -36,13 +37,20 @@ docker-compose up -d
 docker-compose ps
 ```
 
-3. 访问应用
+3. 配置Cloudflare Zero Trust
 
-现在您可以通过VPS的IP地址或域名访问应用：
+在Cloudflare Zero Trust控制面板中：
+
+- 创建一个新的应用
+- 设置应用的内部URL为 `http://localhost:3000`（或您VPS上的实际地址）
+- 配置访问策略和身份验证方式
+- 获取应用的公共URL（例如：`https://twocolorball.your-team.cloudflareaccess.com`）
+
+4. 访问应用
+
+现在您可以通过Cloudflare Zero Trust提供的公共URL访问应用：
 ```
-http://your-vps-ip
-# 或者
-http://your-domain.com
+https://twocolorball.your-team.cloudflareaccess.com
 ```
 
 ### 更新应用
@@ -59,13 +67,13 @@ git pull
 docker-compose up -d --build
 ```
 
-## 方法二：直接部署
+## 直接部署（无需Docker）
 
 如果您不想使用Docker，也可以直接在VPS上部署React应用。
 
 ### 前提条件
 - 一台安装了Node.js和npm的VPS
-- Nginx或Apache Web服务器
+- Cloudflare Zero Trust账户
 - 基本的Linux命令行知识
 
 ### 部署步骤
@@ -91,62 +99,76 @@ cd /path/to/destination
 tar -xzvf build.tar.gz
 ```
 
-3. 配置Nginx
-
-创建一个新的Nginx配置文件：
+3. 安装并使用serve提供服务
 
 ```bash
-sudo nano /etc/nginx/sites-available/twocolorball
+# 安装serve工具
+npm install -g serve
+
+# 启动服务（可以使用nohup或pm2使其在后台运行）
+nohup serve -s build -l 3000 > serve.log 2>&1 &
+
+# 或者使用pm2（推荐）
+npm install -g pm2
+pm2 start "serve -s build -l 3000" --name twocolorball
 ```
 
-添加以下内容：
+4. 配置Cloudflare Zero Trust
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;  # 替换为您的域名或IP
+在Cloudflare Zero Trust控制面板中：
 
-    root /path/to/destination/build;
-    index index.html;
+- 创建一个新的应用
+- 设置应用的内部URL为 `http://localhost:3000`（或您VPS上的实际地址）
+- 配置访问策略和身份验证方式
+- 获取应用的公共URL（例如：`https://twocolorball.your-team.cloudflareaccess.com`）
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
+5. 访问应用
+
+现在您可以通过Cloudflare Zero Trust提供的公共URL访问应用：
 ```
-
-启用配置并重启Nginx：
-
-```bash
-sudo ln -s /etc/nginx/sites-available/twocolorball /etc/nginx/sites-enabled/
-sudo nginx -t  # 测试配置
-sudo systemctl restart nginx
-```
-
-4. 访问应用
-
-现在您可以通过VPS的IP地址或域名访问应用：
-```
-http://your-vps-ip
-# 或者
-http://your-domain.com
+https://twocolorball.your-team.cloudflareaccess.com
 ```
 
 ## 故障排除
 
 如果您在部署过程中遇到问题，请检查：
 
-1. 防火墙设置是否允许80端口访问
-2. Nginx/Docker服务是否正常运行
-3. 日志文件中是否有错误信息
+1. 确保应用在VPS上正常运行并监听在正确的端口上
+2. 检查Cloudflare Zero Trust的配置是否正确
+3. 查看应用日志以排查问题
 
 Docker日志查看：
 ```bash
 docker-compose logs
 ```
 
-Nginx日志查看：
+直接部署日志查看：
 ```bash
-sudo tail -f /var/log/nginx/error.log
-sudo tail -f /var/log/nginx/access.log
-``` 
+# 如果使用nohup
+cat serve.log
+
+# 如果使用pm2
+pm2 logs twocolorball
+```
+
+## Cloudflare Zero Trust配置提示
+
+1. **创建应用**：
+   - 在Cloudflare Zero Trust控制面板中，导航到"Access" > "Applications"
+   - 点击"Add an application"
+   - 选择"Self-hosted"
+
+2. **配置应用**：
+   - 应用名称：例如"双色球号码生成器"
+   - 应用域名：选择一个子域名，例如"twocolorball.your-team.cloudflareaccess.com"
+   - 应用类型：选择"Web application"
+   - 应用URL：输入您VPS上的应用地址，例如"http://localhost:3000"
+
+3. **设置访问策略**：
+   - 创建一个策略来控制谁可以访问您的应用
+   - 可以基于电子邮件、域名、IP地址等设置访问规则
+
+4. **高级设置**（可选）：
+   - 启用或禁用浏览器隔离
+   - 配置会话持续时间
+   - 设置其他安全选项 
