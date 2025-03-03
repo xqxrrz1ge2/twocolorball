@@ -1,0 +1,50 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 0 5px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  transition: all 0.3s ease;
+}
+
+.ball:hover {
+  transform: scale(1.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.red-ball {
+  background: linear-gradient(135deg, #ff5252, #e53935);
+}
+
+.blue-ball {
+  background: linear-gradient(135deg, #42a5f5, #1e88e5);
+}
+
+.combination-card {
+  transition: all 0.3s ease;
+}
+
+.combination-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 600px) {
+  .ball {
+    width: 35px;
+    height: 35px;
+    margin: 0 3px;
+    font-size: 0.9rem;
+  }
+} 
