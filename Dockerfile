@@ -21,4 +21,4 @@ RUN npm install -g serve
 EXPOSE 3100
 
 # 使用serve提供静态文件服务
-CMD ["serve", "-s", "build", "-l", "3000"] 
+CMD ["serve", "-s", "build", "-l", "3100"] 
