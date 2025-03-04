@@ -1,4 +1,3 @@
-ENV APP_VERSION=0.1.1
 FROM node:18-alpine as build
 
 WORKDIR /app
@@ -11,6 +10,8 @@ RUN npm install
 
 # 复制所有文件
 COPY . .
+ARG APP_VERSION=0.1.1
+ENV APP_VERSION=0.1.1
 
 # 构建应用
 RUN npm run build
